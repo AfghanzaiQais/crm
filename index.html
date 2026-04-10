@@ -3,440 +3,524 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
-  <title>Flex CRM · Personal Opportunity Hub</title>
+  <!-- PWA Meta -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Prospect">
+  <meta name="theme-color" content="#f4f4f2">
+  <meta name="description" content="A simple, elegant personal CRM for opportunities">
+  
+  <title>Prospect · simple CRM</title>
+  
+  <link rel="manifest" id="manifest-placeholder">
+  
   <!-- Tailwind + Font Awesome + Google Fonts -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  
   <style>
-    * { font-family: 'Inter', sans-serif; transition: background-color 0.2s ease, border-color 0.2s; }
-    body { background: #f4f6fb; }
-    .dark body { background: #0f172a; }
-    /* custom scroll */
+    * { font-family: 'Inter', sans-serif; }
+    body { background: #fafaf8; }
+    .dark body { background: #1a1e24; }
+    
     ::-webkit-scrollbar { width: 4px; height: 4px; }
-    ::-webkit-scrollbar-track { background: #eef2f6; }
-    .dark ::-webkit-scrollbar-track { background: #1e293b; }
-    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-    .dark ::-webkit-scrollbar-thumb { background: #475569; }
-    .card-hover { transition: all 0.2s ease; }
-    .card-hover:active { transform: scale(0.98); }
-    .modal-backdrop { background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
-    .bottom-nav-active { background: #3b82f6; color: white; box-shadow: 0 6px 12px -6px rgba(59,130,246,0.4); }
-    .dark .bg-white { background-color: #1e293b !important; }
-    .dark .text-slate-800 { color: #f1f5f9 !important; }
-    .dark .text-slate-700 { color: #cbd5e1 !important; }
-    .dark .text-slate-500, .dark .text-slate-400 { color: #94a3b8 !important; }
-    .dark .border-slate-100, .dark .border-slate-200 { border-color: #334155 !important; }
-    .dark .bg-slate-50 { background-color: #0f172a !important; }
-    .dark .bg-slate-100 { background-color: #1e293b !important; }
-    .dark .bg-indigo-50, .dark .bg-blue-50 { background-color: #1e1b4b !important; }
-    .dark input, .dark select, .dark textarea { background-color: #0f172a; border-color: #334155; color: #e2e8f0; }
-    .dark input::placeholder { color: #64748b; }
-    .status-badge { transition: all 0.1s; }
+    ::-webkit-scrollbar-track { background: #eaeae8; }
+    .dark ::-webkit-scrollbar-track { background: #2d333b; }
+    ::-webkit-scrollbar-thumb { background: #b0b0aa; border-radius: 10px; }
+    .dark ::-webkit-scrollbar-thumb { background: #4e5660; }
+    
+    .card-elegant {
+      transition: all 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02), 0 4px 12px rgba(0,0,0,0.02);
+    }
+    .card-elegant:active { transform: scale(0.99); }
+    
+    .modal-backdrop {
+      background: rgba(15, 15, 15, 0.3);
+      backdrop-filter: blur(6px);
+    }
+    
+    .dark .bg-white, .dark .bg-slate-50 { background-color: #262c34 !important; }
+    .dark .border-slate-100, .dark .border-slate-200 { border-color: #363e48 !important; }
+    .dark .text-slate-800, .dark .text-slate-700 { color: #eaeef2 !important; }
+    .dark .text-slate-500, .dark .text-slate-400 { color: #a1abb4 !important; }
+    .dark input, .dark select, .dark textarea { background-color: #1e2329; border-color: #3a424b; color: #eaeef2; }
+    .dark input::placeholder { color: #7e8a96; }
+    
+    .btn-primary {
+      background: #2c3e50;
+      color: white;
+      transition: background 0.2s;
+    }
+    .btn-primary:hover { background: #1e2b38; }
+    .dark .btn-primary { background: #3a4c5e; }
+    .dark .btn-primary:hover { background: #4e6479; }
+    
+    .filter-active {
+      background: #2c3e50 !important;
+      color: white !important;
+      border-color: #2c3e50 !important;
+    }
+    .dark .filter-active { background: #4b6479 !important; border-color: #4b6479 !important; }
+    
+    /* Type delete hover */
+    .type-delete-btn { opacity: 0; transition: opacity 0.15s; }
+    .filter-type-btn:hover .type-delete-btn { opacity: 1; }
+    @media (hover: none) { .type-delete-btn { opacity: 0.6; } }
   </style>
 </head>
-<body class="antialiased">
+<body class="antialiased text-[#1e1e1c] dark:text-[#e6e9ec]">
 
-  <div id="app" class="max-w-3xl mx-auto px-4 pb-24 pt-5 md:pt-6 relative">
-    
-    <!-- header with dark toggle and date -->
-    <div class="flex justify-between items-center mb-5">
-      <div>
-        <h1 class="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">✨ Flex<span class="text-blue-600">CRM</span></h1>
-        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Unlimited opportunity types</p>
-      </div>
-      <div class="flex items-center gap-3">
-        <button id="darkModeToggle" class="text-slate-600 dark:text-slate-300 text-xl p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition"><i class="fas fa-moon"></i></button>
-        <div class="text-right">
-          <p id="currentDate" class="text-xs font-medium text-slate-500 dark:text-slate-400"></p>
-          <p class="text-xs text-slate-400 dark:text-slate-500">personal hub</p>
-        </div>
-      </div>
+<div id="app" class="max-w-3xl mx-auto px-4 pb-24 pt-6 md:pt-8 relative">
+  
+  <!-- header with export/import -->
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-3xl font-light tracking-tight text-[#2c3e50] dark:text-white">
+        prospect<span class="font-medium text-[#64748b] dark:text-slate-400">.</span>
+      </h1>
+      <p class="text-xs uppercase tracking-wider text-stone-400 dark:text-stone-500 mt-0.5">opportunity log</p>
     </div>
-
-    <!-- Dashboard Stats Row -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-      <div class="bg-white dark:bg-slate-800 rounded-2xl p-3 shadow-sm border border-slate-100 dark:border-slate-700">
-        <div class="flex items-center justify-between">
-          <span class="text-slate-400 dark:text-slate-500 text-xs font-medium">TOTAL</span>
-          <i class="fas fa-users text-blue-400 text-sm"></i>
-        </div>
-        <p id="statTotal" class="text-2xl font-bold text-slate-800 dark:text-white mt-1">0</p>
-        <p class="text-[11px] text-slate-400 dark:text-slate-500">all leads</p>
-      </div>
-      <div class="bg-white dark:bg-slate-800 rounded-2xl p-3 shadow-sm border border-slate-100 dark:border-slate-700">
-        <div class="flex items-center justify-between">
-          <span class="text-slate-400 dark:text-slate-500 text-xs font-medium">WON</span>
-          <i class="fas fa-trophy text-amber-500 text-sm"></i>
-        </div>
-        <p id="statWon" class="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">0</p>
-        <p class="text-[11px] text-slate-400 dark:text-slate-500">closed won</p>
-      </div>
-      <div class="bg-white dark:bg-slate-800 rounded-2xl p-3 shadow-sm border border-slate-100 dark:border-slate-700">
-        <div class="flex items-center justify-between">
-          <span class="text-slate-400 dark:text-slate-500 text-xs font-medium">VALUE (WON)</span>
-          <i class="fas fa-dollar-sign text-emerald-500 text-sm"></i>
-        </div>
-        <p id="statValue" class="text-xl font-bold text-slate-800 dark:text-white mt-1">$0</p>
-        <p class="text-[11px] text-slate-400 dark:text-slate-500">total revenue</p>
-      </div>
-      <div class="bg-white dark:bg-slate-800 rounded-2xl p-3 shadow-sm border border-slate-100 dark:border-slate-700">
-        <div class="flex items-center justify-between">
-          <span class="text-slate-400 dark:text-slate-500 text-xs font-medium">ACTIVE</span>
-          <i class="fas fa-chart-line text-sky-500 text-sm"></i>
-        </div>
-        <p id="statActive" class="text-2xl font-bold text-slate-800 dark:text-white mt-1">0</p>
-        <p class="text-[11px] text-slate-400 dark:text-slate-500">in progress</p>
-      </div>
-    </div>
-
-    <!-- Next Action Reminder Banner -->
-    <div id="reminderBanner" class="mb-5 bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-950 dark:to-blue-950 p-3 rounded-xl border border-indigo-100 dark:border-indigo-800 hidden">
-      <div class="flex items-start gap-2">
-        <i class="fas fa-bell text-indigo-500 dark:text-indigo-400 mt-0.5"></i>
-        <div class="flex-1">
-          <p class="text-xs font-semibold text-indigo-800 dark:text-indigo-300 uppercase tracking-wide">⏰ next actions</p>
-          <div id="reminderList" class="text-sm text-slate-700 dark:text-slate-300 mt-1 space-y-1"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Type Filter + Custom Type Manager + Search -->
-    <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
-      <div class="flex gap-1.5 flex-wrap flex-1" id="typeFilterContainer">
-        <button data-filter-type="all" class="filter-type-btn px-3 py-1.5 rounded-full text-xs font-medium bg-blue-600 text-white shadow-sm transition">All</button>
-        <!-- dynamic type filters will appear here -->
-      </div>
-      <div class="relative">
-        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-        <input type="text" id="searchInput" placeholder="Search leads..." class="pl-8 pr-3 py-1.5 text-sm rounded-full border border-slate-200 dark:border-slate-700 w-36 focus:w-48 transition-all focus:outline-none focus:ring-1 focus:ring-blue-300 dark:bg-slate-800 dark:text-white">
-      </div>
-    </div>
-    
-    <!-- Custom type adder row -->
-    <div class="flex gap-2 mb-4 items-center">
-      <input type="text" id="newTypeName" placeholder="New opportunity type (e.g., Internship)" class="flex-1 text-sm border border-slate-200 dark:border-slate-700 rounded-xl p-2 bg-white dark:bg-slate-800 dark:text-white">
-      <button id="addTypeBtn" class="bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 px-3 py-2 rounded-xl text-sm font-medium"><i class="fas fa-plus mr-1"></i>Add type</button>
-    </div>
-
-    <!-- Status chips quick filter -->
-    <div class="flex gap-1.5 mb-4 overflow-x-auto pb-1">
-      <button data-status="all" class="status-filter px-3 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 whitespace-nowrap">All status</button>
-      <button data-status="Interested" class="status-filter px-3 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 whitespace-nowrap">🔍 Interested</button>
-      <button data-status="Applied" class="status-filter px-3 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 whitespace-nowrap">📄 Applied</button>
-      <button data-status="Interview" class="status-filter px-3 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 whitespace-nowrap">🎤 Interview</button>
-      <button data-status="Won" class="status-filter px-3 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 whitespace-nowrap">🏆 Won</button>
-      <button data-status="Lost" class="status-filter px-3 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 whitespace-nowrap">❌ Lost</button>
-    </div>
-
-    <!-- Leads List Container -->
-    <div id="leadsContainer" class="space-y-3 pb-2"></div>
-
-    <!-- Floating Action Button -->
-    <button id="fabAddLead" class="fixed bottom-20 right-5 md:right-1/4 lg:right-1/3 bg-blue-600 text-white p-4 rounded-full shadow-xl hover:bg-blue-700 transition-all z-20 active:scale-95">
-      <i class="fas fa-plus text-xl"></i>
-    </button>
-
-    <!-- MODAL : ADD / EDIT LEAD (now with custom type selector) -->
-    <div id="leadModal" class="fixed inset-0 z-30 hidden items-center justify-center p-4 modal-backdrop transition-all">
-      <div class="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl">
-        <div class="sticky top-0 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-5 py-3 flex justify-between items-center">
-          <h3 id="modalTitle" class="font-bold text-slate-800 dark:text-white">➕ Add new lead</h3>
-          <button id="closeModalBtn" class="text-slate-400 text-xl">&times;</button>
-        </div>
-        <form id="leadForm" class="p-5 space-y-4">
-          <input type="hidden" id="leadId" value="">
-          <!-- Lead Type selector with custom options -->
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Opportunity type *</label>
-            <select id="leadType" class="w-full border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-sm bg-white dark:bg-slate-900" required></select>
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Title / Role *</label>
-            <input id="leadTitle" type="text" placeholder="e.g., Senior Dev, Logo design, Partnership" class="w-full border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-sm bg-white dark:bg-slate-900" required>
-          </div>
-          <div>
-            <label id="companyLabel" class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Company / Client *</label>
-            <input id="leadCompany" type="text" placeholder="Company or client name" class="w-full border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-sm bg-white dark:bg-slate-900" required>
-          </div>
-          <div class="grid grid-cols-2 gap-3">
-            <div><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">💰 Value ($)</label><input id="leadValue" type="number" value="0" step="500" class="w-full border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-sm bg-white dark:bg-slate-900"></div>
-            <div><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">📅 Next action</label><input id="leadNextDate" type="date" class="w-full border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-sm bg-white dark:bg-slate-900"></div>
-          </div>
-          <div class="grid grid-cols-2 gap-3">
-            <div><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">📧 Email</label><input id="leadEmail" type="email" placeholder="contact@example.com" class="w-full border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-sm bg-white dark:bg-slate-900"></div>
-            <div><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">📞 Phone</label><input id="leadPhone" type="tel" placeholder="+123456789" class="w-full border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-sm bg-white dark:bg-slate-900"></div>
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Status</label>
-            <select id="leadStatus" class="w-full border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-sm bg-white dark:bg-slate-900">
-              <option value="Interested">Interested</option><option value="Applied">Applied / Proposal sent</option><option value="Interview">Interview / Negotiation</option><option value="Won">Won</option><option value="Lost">Lost</option>
-            </select>
-          </div>
-          <div><label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Notes / Context</label><textarea id="leadNotes" rows="2" placeholder="Any details..." class="w-full border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-sm bg-white dark:bg-slate-900"></textarea></div>
-          <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl transition">Save lead</button>
-        </form>
-      </div>
-    </div>
-
-    <!-- Activity Log Modal -->
-    <div id="activityModal" class="fixed inset-0 z-30 hidden items-center justify-center p-4 modal-backdrop">
-      <div class="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-md max-h-[80vh] flex flex-col shadow-xl">
-        <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-700 p-4">
-          <h3 class="font-bold text-slate-800 dark:text-white"><i class="fas fa-history text-blue-500 mr-2"></i>Activity timeline</h3>
-          <button id="closeActivityBtn" class="text-slate-400 text-2xl">&times;</button>
-        </div>
-        <div id="activityListContainer" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
-        <div class="p-3 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
-          <div class="flex gap-2">
-            <input type="text" id="newActivityText" placeholder="Add note, call, email..." class="flex-1 border border-slate-200 dark:border-slate-700 rounded-xl p-2 text-sm bg-white dark:bg-slate-900">
-            <button id="addActivityBtn" class="bg-blue-500 text-white px-4 rounded-xl text-sm">+ Add</button>
-          </div>
-        </div>
+    <div class="flex items-center gap-2">
+      <!-- export / import -->
+      <button id="exportBtn" class="text-stone-500 dark:text-stone-300 p-2 rounded-full hover:bg-stone-200/60 dark:hover:bg-white/10 transition" title="Export data"><i class="fas fa-download"></i></button>
+      <label class="text-stone-500 dark:text-stone-300 p-2 rounded-full hover:bg-stone-200/60 dark:hover:bg-white/10 transition cursor-pointer" title="Import data"><i class="fas fa-upload"></i><input type="file" id="importFile" accept=".json,application/json" class="hidden"></label>
+      <button id="darkModeToggle" class="text-stone-500 dark:text-stone-300 text-xl p-2 rounded-full hover:bg-stone-200/60 dark:hover:bg-white/10 transition"><i class="fas fa-moon"></i></button>
+      <div class="text-right">
+        <p id="currentDate" class="text-xs font-medium text-stone-500 dark:text-stone-400"></p>
+        <p class="text-[10px] text-stone-400 dark:text-stone-500">v2 · pwa</p>
       </div>
     </div>
   </div>
 
-  <script>
-    // ---------- DATA MODEL ----------
-    let leads = [];          // each lead: id, type (string custom), title, company, value, status, nextActionDate, notes, email, phone, activities[]
-    let customTypes = ['job', 'freelance', 'business'];  // default, but can be extended
+  <!-- Stats row (unchanged) -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+    <div class="bg-white dark:bg-[#262c34] rounded-2xl p-4 card-elegant border border-stone-100/80 dark:border-stone-700/30">
+      <div class="flex items-center justify-between"><span class="text-stone-400 text-xs font-medium tracking-wide">TOTAL</span><i class="fas fa-gem text-stone-300 text-sm"></i></div>
+      <p id="statTotal" class="text-3xl font-light text-stone-700 dark:text-stone-200 mt-1">0</p><p class="text-[11px] text-stone-400">all opportunities</p>
+    </div>
+    <div class="bg-white dark:bg-[#262c34] rounded-2xl p-4 card-elegant border border-stone-100/80 dark:border-stone-700/30">
+      <div class="flex items-center justify-between"><span class="text-stone-400 text-xs font-medium tracking-wide">WON</span><i class="fas fa-check-circle text-emerald-500/70 text-sm"></i></div>
+      <p id="statWon" class="text-3xl font-light text-emerald-700 dark:text-emerald-300 mt-1">0</p><p class="text-[11px] text-stone-400">closed won</p>
+    </div>
+    <div class="bg-white dark:bg-[#262c34] rounded-2xl p-4 card-elegant border border-stone-100/80 dark:border-stone-700/30">
+      <div class="flex items-center justify-between"><span class="text-stone-400 text-xs font-medium tracking-wide">VALUE</span><i class="fas fa-coins text-amber-500/60 text-sm"></i></div>
+      <p id="statValue" class="text-2xl font-light text-stone-700 dark:text-stone-200 mt-1">$0</p><p class="text-[11px] text-stone-400">won revenue</p>
+    </div>
+    <div class="bg-white dark:bg-[#262c34] rounded-2xl p-4 card-elegant border border-stone-100/80 dark:border-stone-700/30">
+      <div class="flex items-center justify-between"><span class="text-stone-400 text-xs font-medium tracking-wide">ACTIVE</span><i class="fas fa-compass text-sky-400/60 text-sm"></i></div>
+      <p id="statActive" class="text-3xl font-light text-stone-700 dark:text-stone-200 mt-1">0</p><p class="text-[11px] text-stone-400">in progress</p>
+    </div>
+  </div>
+
+  <!-- Reminder banner -->
+  <div id="reminderBanner" class="mb-5 bg-stone-50/90 dark:bg-stone-800/30 p-4 rounded-xl border border-stone-200/60 dark:border-stone-700/40 hidden">
+    <div class="flex items-start gap-3"><i class="fas fa-bell text-stone-400 dark:text-stone-500 mt-0.5"></i><div class="flex-1"><p class="text-xs font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400">next actions</p><div id="reminderList" class="text-sm text-stone-600 dark:text-stone-300 mt-1 space-y-1"></div></div></div>
+  </div>
+
+  <!-- Type filter + search -->
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+    <div class="flex gap-1.5 flex-wrap items-center" id="typeFilterContainer">
+      <button data-filter-type="all" class="filter-type-btn px-4 py-1.5 rounded-full text-xs font-medium bg-white dark:bg-[#2d333b] text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-600 shadow-sm transition">All</button>
+    </div>
+    <div class="relative">
+      <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 text-xs"></i>
+      <input type="text" id="searchInput" placeholder="Search..." class="pl-8 pr-4 py-2 text-sm rounded-full border border-stone-200 dark:border-stone-600 w-40 focus:w-52 transition-all focus:outline-none focus:ring-1 focus:ring-stone-300 bg-white/90 dark:bg-[#1e2329] dark:text-white">
+    </div>
+  </div>
+  
+  <!-- custom type adder row + manage types button -->
+  <div class="flex gap-2 mb-4 items-center">
+    <input type="text" id="newTypeName" placeholder="New type (e.g. Consulting)" class="flex-1 text-sm border border-stone-200 dark:border-stone-600 rounded-xl p-2.5 bg-white/90 dark:bg-[#1e2329] dark:text-white placeholder:text-stone-400">
+    <button id="addTypeBtn" class="bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-200 px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-stone-300 transition"><i class="fas fa-plus mr-1 text-xs"></i>Add</button>
+    <button id="manageTypesBtn" class="bg-white dark:bg-[#2d333b] border border-stone-200 dark:border-stone-600 text-stone-600 dark:text-stone-300 px-4 py-2.5 rounded-xl text-sm font-medium"><i class="fas fa-tags mr-1"></i>Manage</button>
+  </div>
+
+  <!-- Status filters -->
+  <div class="flex gap-1.5 mb-5 overflow-x-auto pb-1 no-scrollbar">
+    <button data-status="all" class="status-filter px-4 py-1.5 rounded-full text-xs font-medium bg-white dark:bg-[#2d333b] text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-600 whitespace-nowrap shadow-sm">All status</button>
+    <button data-status="Interested" class="status-filter px-4 py-1.5 rounded-full text-xs font-medium bg-white dark:bg-[#2d333b] text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-600 whitespace-nowrap">🔍 Interested</button>
+    <button data-status="Applied" class="status-filter px-4 py-1.5 rounded-full text-xs font-medium bg-white dark:bg-[#2d333b] text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-600 whitespace-nowrap">📄 Applied</button>
+    <button data-status="Interview" class="status-filter px-4 py-1.5 rounded-full text-xs font-medium bg-white dark:bg-[#2d333b] text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-600 whitespace-nowrap">🎤 Interview</button>
+    <button data-status="Won" class="status-filter px-4 py-1.5 rounded-full text-xs font-medium bg-white dark:bg-[#2d333b] text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-600 whitespace-nowrap">🏆 Won</button>
+    <button data-status="Lost" class="status-filter px-4 py-1.5 rounded-full text-xs font-medium bg-white dark:bg-[#2d333b] text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-600 whitespace-nowrap">❌ Lost</button>
+  </div>
+
+  <!-- Leads container -->
+  <div id="leadsContainer" class="space-y-3 pb-2"></div>
+
+  <!-- FAB -->
+  <button id="fabAddLead" class="fixed bottom-20 right-5 md:right-[calc(50%-360px)] lg:right-[calc(50%-400px)] btn-primary p-4 rounded-full shadow-lg hover:shadow-xl transition-all z-20 active:scale-95">
+    <i class="fas fa-plus text-xl"></i>
+  </button>
+
+  <!-- MODAL: Add/Edit (unchanged mostly) -->
+  <div id="leadModal" class="fixed inset-0 z-30 hidden items-center justify-center p-4 modal-backdrop">
+    <div class="bg-white dark:bg-[#262c34] rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl border border-stone-200/50">
+      <div class="sticky top-0 bg-white dark:bg-[#262c34] border-b border-stone-100 dark:border-stone-700 px-5 py-4 flex justify-between items-center">
+        <h3 id="modalTitle" class="font-medium text-lg text-stone-800 dark:text-white">New opportunity</h3>
+        <button id="closeModalBtn" class="text-stone-400 hover:text-stone-600 text-2xl leading-5">&times;</button>
+      </div>
+      <form id="leadForm" class="p-5 space-y-4">
+        <input type="hidden" id="leadId" value="">
+        <div><label class="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">TYPE</label><select id="leadType" class="w-full border border-stone-200 dark:border-stone-600 rounded-xl p-2.5 text-sm bg-stone-50/50 dark:bg-[#1e2329]" required></select></div>
+        <div><label class="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">TITLE</label><input id="leadTitle" type="text" placeholder="e.g. Senior Designer" class="w-full border border-stone-200 dark:border-stone-600 rounded-xl p-2.5 text-sm bg-stone-50/50 dark:bg-[#1e2329]" required></div>
+        <div><label class="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">ORGANIZATION</label><input id="leadCompany" type="text" placeholder="Company or client" class="w-full border border-stone-200 dark:border-stone-600 rounded-xl p-2.5 text-sm bg-stone-50/50 dark:bg-[#1e2329]" required></div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">VALUE ($)</label><input id="leadValue" type="number" value="0" step="500" class="w-full border border-stone-200 dark:border-stone-600 rounded-xl p-2.5 text-sm bg-stone-50/50 dark:bg-[#1e2329]"></div>
+          <div><label class="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">NEXT ACTION</label><input id="leadNextDate" type="date" class="w-full border border-stone-200 dark:border-stone-600 rounded-xl p-2.5 text-sm bg-stone-50/50 dark:bg-[#1e2329]"></div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">EMAIL</label><input id="leadEmail" type="email" class="w-full border border-stone-200 dark:border-stone-600 rounded-xl p-2.5 text-sm bg-stone-50/50 dark:bg-[#1e2329]"></div>
+          <div><label class="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">PHONE</label><input id="leadPhone" type="tel" class="w-full border border-stone-200 dark:border-stone-600 rounded-xl p-2.5 text-sm bg-stone-50/50 dark:bg-[#1e2329]"></div>
+        </div>
+        <div><label class="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">STATUS</label><select id="leadStatus" class="w-full border border-stone-200 dark:border-stone-600 rounded-xl p-2.5 text-sm bg-stone-50/50 dark:bg-[#1e2329]"><option value="Interested">Interested</option><option value="Applied">Applied / Proposal</option><option value="Interview">Interview / Negotiation</option><option value="Won">Won</option><option value="Lost">Lost</option></select></div>
+        <div><label class="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">NOTES</label><textarea id="leadNotes" rows="2" class="w-full border border-stone-200 dark:border-stone-600 rounded-xl p-2.5 text-sm bg-stone-50/50 dark:bg-[#1e2329]"></textarea></div>
+        <button type="submit" class="w-full btn-primary font-medium py-3 rounded-xl transition">Save opportunity</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Lead Detail View (new) -->
+  <div id="detailModal" class="fixed inset-0 z-30 hidden items-center justify-center p-4 modal-backdrop">
+    <div class="bg-white dark:bg-[#262c34] rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl border border-stone-200/50">
+      <div class="sticky top-0 bg-white dark:bg-[#262c34] border-b border-stone-100 dark:border-stone-700 px-5 py-4 flex justify-between items-center">
+        <h3 class="font-medium text-lg text-stone-800 dark:text-white"><i class="far fa-id-card mr-2"></i>Opportunity details</h3>
+        <button id="closeDetailModalBtn" class="text-stone-400 hover:text-stone-600 text-2xl leading-5">&times;</button>
+      </div>
+      <div id="detailContent" class="p-5 space-y-4"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: Manage Types (delete custom types) -->
+  <div id="manageTypesModal" class="fixed inset-0 z-30 hidden items-center justify-center p-4 modal-backdrop">
+    <div class="bg-white dark:bg-[#262c34] rounded-2xl w-full max-w-sm shadow-2xl">
+      <div class="flex justify-between items-center border-b border-stone-200 dark:border-stone-700 p-4">
+        <h3 class="font-medium text-stone-800 dark:text-white"><i class="fas fa-tags mr-2"></i>Manage types</h3>
+        <button id="closeManageTypesBtn" class="text-stone-400 text-2xl">&times;</button>
+      </div>
+      <div class="p-4 space-y-3 max-h-80 overflow-y-auto" id="manageTypesList"></div>
+      <div class="p-4 border-t border-stone-200 dark:border-stone-700"><button id="doneManageTypes" class="w-full btn-primary py-2 rounded-xl">Done</button></div>
+    </div>
+  </div>
+
+  <!-- Activity modal (unchanged) -->
+  <div id="activityModal" class="fixed inset-0 z-30 hidden items-center justify-center p-4 modal-backdrop">
+    <div class="bg-white dark:bg-[#262c34] rounded-2xl w-full max-w-md max-h-[80vh] flex flex-col shadow-2xl">
+      <div class="flex justify-between items-center border-b border-stone-200 dark:border-stone-700 p-4"><h3 class="font-medium"><i class="far fa-clock text-stone-500 mr-2"></i>Activity</h3><button id="closeActivityBtn" class="text-stone-400 text-2xl">&times;</button></div>
+      <div id="activityListContainer" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
+      <div class="p-4 border-t bg-stone-50/80 dark:bg-stone-800/30"><div class="flex gap-2"><input type="text" id="newActivityText" placeholder="Add note…" class="flex-1 border border-stone-200 dark:border-stone-600 rounded-xl p-2.5 text-sm bg-white dark:bg-[#1e2329]"><button id="addActivityBtn" class="btn-primary px-5 rounded-xl text-sm">Add</button></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    "use strict";
+    
+    // PWA setup
+    const manifest = { name: "Prospect CRM", short_name: "Prospect", start_url: ".", display: "standalone", theme_color: "#f4f4f2", background_color: "#fafaf8", icons: [{ src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%232c3e50'/%3E%3Ctext x='50' y='68' font-family='Inter' font-size='50' fill='white' text-anchor='middle' font-weight='300'%3EP%3C/text%3E%3C/svg%3E", sizes: "512x512", type: "image/svg+xml" }] };
+    document.getElementById('manifest-placeholder').href = URL.createObjectURL(new Blob([JSON.stringify(manifest)], {type:'application/manifest+json'}));
+    if ('serviceWorker' in navigator) {
+      const swCode = `const CACHE='prospect-v2';self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['.', 'https://cdn.tailwindcss.com', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css']))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));`;
+      navigator.serviceWorker.register(URL.createObjectURL(new Blob([swCode], {type:'application/javascript'})));
+    }
+
+    // ---------- DATA ----------
+    let leads = [];
+    let customTypes = ['job', 'freelance', 'business'];
     let currentFilterType = 'all';
     let currentStatusFilter = 'all';
     let searchQuery = '';
     let currentActivityLeadId = null;
-
-    // Load from localStorage
+    
     function loadData() {
-      const storedLeads = localStorage.getItem('flex_crm_leads');
-      if (storedLeads) leads = JSON.parse(storedLeads);
-      const storedTypes = localStorage.getItem('flex_crm_types');
-      if (storedTypes) customTypes = JSON.parse(storedTypes);
+      const stored = localStorage.getItem('prospect_crm_leads_v2');
+      if(stored) leads = JSON.parse(stored);
+      const storedTypes = localStorage.getItem('prospect_crm_types_v2');
+      if(storedTypes) customTypes = JSON.parse(storedTypes);
       else { customTypes = ['job', 'freelance', 'business']; saveTypes(); }
-      if (!storedLeads) {
-        // demo leads with custom types
+      if(!stored) {
         leads = [
-          { id: Date.now()+1, type: 'job', title: 'Frontend Developer', company: 'TechCorp', value: 85000, status: 'Interview', nextActionDate: '2026-04-18', notes: 'Great culture fit', email: 'hr@techcorp.com', phone: '+15551234', createdAt: new Date().toISOString(), activities: [{ text: 'Screening done', date: new Date().toISOString() }] },
-          { id: Date.now()+2, type: 'freelance', title: 'Brand Identity', company: 'StartupStudio', value: 2400, status: 'Applied', nextActionDate: '2026-04-14', notes: 'Portfolio sent', email: 'art@startup.com', phone: '', activities: [] },
-          { id: Date.now()+3, type: 'business', title: 'Partnership deal', company: 'GreenEnergy Ltd', value: 15000, status: 'Interested', nextActionDate: '2026-04-22', notes: 'First meeting', email: 'ceo@green.com', phone: '+44201234', activities: [] }
+          { id: Date.now()+1, type: 'job', title: 'Product Designer', company: 'Studio D', value: 92000, status: 'Interview', nextActionDate: '2026-04-20', notes: 'Portfolio review', email: 'hello@studiod.com', phone: '+1 555 1234', createdAt: new Date().toISOString(), activities: [] },
+          { id: Date.now()+2, type: 'freelance', title: 'Brand Refresh', company: 'Oasis Cafe', value: 3800, status: 'Applied', nextActionDate: '2026-04-15', notes: '', email: 'owner@oasis.com', phone: '', activities: [] },
         ];
         saveLeads();
       }
       renderAll();
     }
-    function saveLeads() { localStorage.setItem('flex_crm_leads', JSON.stringify(leads)); }
-    function saveTypes() { localStorage.setItem('flex_crm_types', JSON.stringify(customTypes)); }
-
-    // add new custom type
-    function addCustomType(typeName) {
-      let clean = typeName.trim().toLowerCase().replace(/\s+/g, '_');
-      if (!clean) return false;
-      if (!customTypes.includes(clean)) {
-        customTypes.push(clean);
-        saveTypes();
-        renderTypeFilters();
-        renderTypeSelect();
-        return true;
-      }
-      return false;
+    function saveLeads() { localStorage.setItem('prospect_crm_leads_v2', JSON.stringify(leads)); }
+    function saveTypes() { localStorage.setItem('prospect_crm_types_v2', JSON.stringify(customTypes)); }
+    
+    function escapeHtml(s) { if(!s) return ''; return s.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }
+    
+    // Custom type management
+    function addCustomType(name) {
+      let clean = name.trim().toLowerCase().replace(/\s+/g, '_');
+      if(!clean || customTypes.includes(clean)) return false;
+      customTypes.push(clean); saveTypes(); renderTypeFilters(); renderTypeSelect(); return true;
     }
-
-    // render type filter buttons + custom type manager UI
+    function deleteCustomType(type) {
+      if (type === 'all') return;
+      const used = leads.some(l => l.type === type);
+      if (used) { alert(`Cannot delete "${type}" — it is used by existing opportunities.`); return false; }
+      customTypes = customTypes.filter(t => t !== type);
+      saveTypes();
+      if (currentFilterType === type) currentFilterType = 'all';
+      renderTypeFilters(); renderTypeSelect(); renderAll();
+      return true;
+    }
+    
     function renderTypeFilters() {
       const container = document.getElementById('typeFilterContainer');
-      container.innerHTML = `<button data-filter-type="all" class="filter-type-btn px-3 py-1.5 rounded-full text-xs font-medium bg-blue-600 text-white shadow-sm transition">All</button>`;
-      customTypes.forEach(type => {
-        const displayName = type.charAt(0).toUpperCase() + type.slice(1);
+      container.innerHTML = `<button data-filter-type="all" class="filter-type-btn px-4 py-1.5 rounded-full text-xs font-medium bg-white dark:bg-[#2d333b] text-stone-600 border shadow-sm transition relative group">All</button>`;
+      customTypes.forEach(t => {
         const btn = document.createElement('button');
-        btn.setAttribute('data-filter-type', type);
-        btn.className = `filter-type-btn px-3 py-1.5 rounded-full text-xs font-medium bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700`;
-        btn.innerText = displayName;
+        btn.dataset.filterType = t;
+        btn.className = `filter-type-btn px-4 py-1.5 rounded-full text-xs font-medium bg-white dark:bg-[#2d333b] text-stone-600 border border-stone-200 dark:border-stone-600 shadow-sm relative group`;
+        btn.innerHTML = `${t.charAt(0).toUpperCase() + t.slice(1)} <span class="type-delete-btn ml-1 text-stone-400 hover:text-red-500 text-[10px] inline-block" data-type="${t}" title="Delete type (if unused)"><i class="fas fa-times-circle"></i></span>`;
         container.appendChild(btn);
       });
-      // reattach events
-      document.querySelectorAll('.filter-type-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('.filter-type-btn').forEach(b => b.classList.remove('bg-blue-600', 'text-white', 'border-blue-600'));
-          btn.classList.add('bg-blue-600', 'text-white');
-          currentFilterType = btn.dataset.filterType;
+      document.querySelectorAll('.filter-type-btn').forEach(b => {
+        b.addEventListener('click', (e) => {
+          if (e.target.closest('.type-delete-btn')) return; // handled separately
+          document.querySelectorAll('.filter-type-btn').forEach(bt => bt.classList.remove('filter-active'));
+          b.classList.add('filter-active');
+          currentFilterType = b.dataset.filterType;
           renderAll();
         });
       });
-      // highlight current
-      document.querySelectorAll('.filter-type-btn').forEach(btn => { if(btn.dataset.filterType === currentFilterType) btn.classList.add('bg-blue-600', 'text-white'); });
-    }
-
-    function renderTypeSelect() {
-      const select = document.getElementById('leadType');
-      select.innerHTML = '';
-      customTypes.forEach(type => {
-        const option = document.createElement('option');
-        option.value = type;
-        option.textContent = type.charAt(0).toUpperCase() + type.slice(1);
-        select.appendChild(option);
+      document.querySelectorAll('.type-delete-btn').forEach(del => {
+        del.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const type = del.dataset.type;
+          if (confirm(`Delete type "${type}"? (Only if unused)`)) { deleteCustomType(type); }
+        });
       });
+      const active = Array.from(document.querySelectorAll('.filter-type-btn')).find(b => b.dataset.filterType === currentFilterType);
+      if(active) active.classList.add('filter-active');
     }
-
-    // add activity
-    function addActivityToLead(leadId, text) {
-      if (!text.trim()) return;
+    
+    function renderTypeSelect() {
+      const sel = document.getElementById('leadType');
+      sel.innerHTML = '';
+      customTypes.forEach(t => { const o = new Option(t.charAt(0).toUpperCase()+t.slice(1), t); sel.add(o); });
+    }
+    
+    // Manage types modal
+    function renderManageTypesModal() {
+      const list = document.getElementById('manageTypesList');
+      list.innerHTML = customTypes.map(t => `
+        <div class="flex items-center justify-between p-2 border-b border-stone-100 dark:border-stone-700">
+          <span class="text-sm">${t}</span>
+          <button class="text-stone-400 hover:text-red-500 delete-single-type" data-type="${t}"><i class="fas fa-trash-alt"></i></button>
+        </div>
+      `).join('');
+      document.querySelectorAll('.delete-single-type').forEach(b => b.addEventListener('click', () => {
+        if (deleteCustomType(b.dataset.type)) { renderManageTypesModal(); }
+      }));
+    }
+    
+    // Activity
+    function addActivity(leadId, text) {
+      if(!text.trim()) return;
       const lead = leads.find(l => l.id == leadId);
-      if (lead) {
-        if (!lead.activities) lead.activities = [];
+      if(lead) {
+        if(!lead.activities) lead.activities = [];
         lead.activities.push({ text: text.trim(), date: new Date().toISOString() });
         saveLeads();
-        if (currentActivityLeadId == leadId) renderActivityModal(leadId);
+        if(currentActivityLeadId == leadId) renderActivityModal(leadId);
         renderAll();
       }
     }
-
+    function addCalledActivity(leadId) {
+      addActivity(leadId, '📞 Called');
+    }
+    
     function renderActivityModal(leadId) {
       const lead = leads.find(l => l.id == leadId);
-      const container = document.getElementById('activityListContainer');
-      if (!lead || !container) return;
-      if (lead.activities && lead.activities.length) {
-        container.innerHTML = lead.activities.slice().reverse().map(act => `
-          <div class="bg-slate-50 dark:bg-slate-900 p-3 rounded-xl border-l-4 border-blue-300">
-            <p class="text-sm text-slate-700 dark:text-slate-300">${escapeHtml(act.text)}</p>
-            <p class="text-[10px] text-slate-400 mt-1">${new Date(act.date).toLocaleString()}</p>
-          </div>
-        `).join('');
-      } else container.innerHTML = '<div class="text-center text-slate-400 text-sm py-6">No activity yet. Add a note above ✍️</div>';
+      const cont = document.getElementById('activityListContainer');
+      if(!lead) return;
+      if(lead.activities?.length) {
+        cont.innerHTML = lead.activities.slice().reverse().map(a => `<div class="bg-stone-50/70 dark:bg-stone-800/40 p-3 rounded-xl border-l-4 border-stone-400"><p class="text-sm">${escapeHtml(a.text)}</p><p class="text-[10px] text-stone-400 mt-1">${new Date(a.date).toLocaleString()}</p></div>`).join('');
+      } else cont.innerHTML = '<div class="text-center text-stone-400 py-8">No activity yet</div>';
     }
-
-    function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, function(m){ if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
-
-    function addLead(leadData) { const newLead = { ...leadData, id: Date.now(), createdAt: new Date().toISOString(), activities: [] }; leads.unshift(newLead); saveLeads(); renderAll(); }
-    function updateLead(id, updated) { const index = leads.findIndex(l => l.id == id); if (index !== -1) { leads[index] = { ...leads[index], ...updated, activities: leads[index].activities || [] }; saveLeads(); renderAll(); } }
-    function deleteLead(id) { if (confirm('Delete this opportunity? Activity log will be lost.')) { leads = leads.filter(l => l.id != id); saveLeads(); renderAll(); if(currentActivityLeadId == id) closeActivityModal(); } }
-
+    
     function getFilteredLeads() {
-      return leads.filter(lead => {
-        if (currentFilterType !== 'all' && lead.type !== currentFilterType) return false;
-        if (currentStatusFilter !== 'all' && lead.status !== currentStatusFilter) return false;
-        if (searchQuery.trim() !== '') {
+      return leads.filter(l => {
+        if(currentFilterType !== 'all' && l.type !== currentFilterType) return false;
+        if(currentStatusFilter !== 'all' && l.status !== currentStatusFilter) return false;
+        if(searchQuery.trim()) {
           const q = searchQuery.toLowerCase();
-          return lead.title.toLowerCase().includes(q) || lead.company.toLowerCase().includes(q) || (lead.notes && lead.notes.toLowerCase().includes(q));
+          return l.title.toLowerCase().includes(q) || l.company.toLowerCase().includes(q) || (l.notes||'').toLowerCase().includes(q);
         }
         return true;
       });
     }
-
+    
     function updateStats() {
       const total = leads.length;
-      const wonLeads = leads.filter(l => l.status === 'Won');
-      const wonCount = wonLeads.length;
-      const totalValue = wonLeads.reduce((sum, l) => sum + (Number(l.value) || 0), 0);
-      const activeStatuses = ['Interested', 'Applied', 'Interview'];
-      const activeCount = leads.filter(l => activeStatuses.includes(l.status)).length;
+      const won = leads.filter(l => l.status === 'Won');
+      const wonVal = won.reduce((s,l)=> s + (Number(l.value)||0), 0);
+      const active = leads.filter(l => ['Interested','Applied','Interview'].includes(l.status)).length;
       document.getElementById('statTotal').innerText = total;
-      document.getElementById('statWon').innerText = wonCount;
-      document.getElementById('statValue').innerText = `$${totalValue.toLocaleString()}`;
-      document.getElementById('statActive').innerText = activeCount;
+      document.getElementById('statWon').innerText = won.length;
+      document.getElementById('statValue').innerText = '$'+wonVal.toLocaleString();
+      document.getElementById('statActive').innerText = active;
+      
       const today = new Date().toISOString().slice(0,10);
-      const upcoming = leads.filter(l => l.nextActionDate && l.nextActionDate >= today && l.status !== 'Won' && l.status !== 'Lost');
-      upcoming.sort((a,b)=> (a.nextActionDate||'9999').localeCompare(b.nextActionDate||'9999'));
-      const reminderDiv = document.getElementById('reminderBanner');
-      const reminderListDiv = document.getElementById('reminderList');
-      if (upcoming.length > 0) {
-        reminderDiv.classList.remove('hidden');
-        reminderListDiv.innerHTML = upcoming.slice(0,3).map(l => `<div class="flex justify-between items-center"><span><i class="far fa-calendar-alt mr-1 text-indigo-500 text-xs"></i> ${escapeHtml(l.title)} (${l.company})</span><span class="text-[11px] font-mono bg-white dark:bg-slate-700 px-2 py-0.5 rounded-full">${l.nextActionDate}</span></div>`).join('');
-        if(upcoming.length>3) reminderListDiv.innerHTML += `<div class="text-[11px] text-indigo-400">+${upcoming.length-3} more...</div>`;
-      } else reminderDiv.classList.add('hidden');
+      const upcoming = leads.filter(l => l.nextActionDate && l.nextActionDate >= today && !['Won','Lost'].includes(l.status)).sort((a,b)=> a.nextActionDate.localeCompare(b.nextActionDate));
+      const banner = document.getElementById('reminderBanner'), listDiv = document.getElementById('reminderList');
+      if(upcoming.length) {
+        banner.classList.remove('hidden');
+        listDiv.innerHTML = upcoming.slice(0,3).map(l => `<div class="flex justify-between"><span>${escapeHtml(l.title)} · ${l.company}</span><span class="text-xs bg-white/60 dark:bg-stone-700/40 px-2 py-0.5 rounded-full">${l.nextActionDate}</span></div>`).join('');
+        if(upcoming.length>3) listDiv.innerHTML += `<div class="text-xs text-stone-400">+${upcoming.length-3} more</div>`;
+      } else banner.classList.add('hidden');
     }
-
-    function renderLeadsList() {
-      const container = document.getElementById('leadsContainer');
+    
+    function renderLeads() {
+      const cont = document.getElementById('leadsContainer');
       const filtered = getFilteredLeads();
-      if (filtered.length === 0) { container.innerHTML = `<div class="text-center py-12 bg-white dark:bg-slate-800 rounded-2xl shadow-sm"><i class="fas fa-inbox text-4xl text-slate-300 dark:text-slate-600 mb-2"></i><p class="text-slate-500 dark:text-slate-400">No leads match. Tap + to add.</p></div>`; return; }
-      container.innerHTML = filtered.map(lead => {
-        const typeDisplay = lead.type.charAt(0).toUpperCase() + lead.type.slice(1);
-        const typeColor = 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200';
-        const statusColor = { Interested:'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-200', Applied:'bg-sky-100 text-sky-700 dark:bg-sky-900 dark:text-sky-200', Interview:'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200', Won:'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-200', Lost:'bg-rose-100 text-rose-700 dark:bg-rose-900 dark:text-rose-200' }[lead.status] || 'bg-gray-100';
-        const nextDateHtml = lead.nextActionDate ? `<div class="flex items-center text-[11px] text-slate-500 dark:text-slate-400"><i class="far fa-calendar-alt mr-1"></i> ${lead.nextActionDate}</div>` : '';
-        const valueHtml = `<div class="font-semibold text-slate-700 dark:text-slate-200">$${(Number(lead.value) || 0).toLocaleString()}</div>`;
+      if(!filtered.length) { cont.innerHTML = `<div class="text-center py-16 bg-white dark:bg-[#262c34] rounded-2xl border border-stone-100"><i class="far fa-file-alt text-4xl text-stone-300 mb-3"></i><p class="text-stone-400">No opportunities · tap +</p></div>`; return; }
+      cont.innerHTML = filtered.map(l => {
+        const typeClass = 'bg-stone-100 text-stone-700 dark:bg-stone-800 dark:text-stone-200';
+        const statusMap = { Interested:'bg-amber-50 text-amber-700', Applied:'bg-sky-50 text-sky-700', Interview:'bg-indigo-50 text-indigo-700', Won:'bg-emerald-50 text-emerald-700', Lost:'bg-rose-50 text-rose-700' };
         return `
-          <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-4 card-hover">
-            <div class="flex justify-between items-start">
-              <div class="flex gap-2 flex-wrap items-center">
-                <span class="text-xs font-medium px-2 py-0.5 rounded-full ${typeColor}">📌 ${typeDisplay}</span>
-                <span class="text-xs px-2 py-0.5 rounded-full ${statusColor}">${lead.status}</span>
-              </div>
-              <div class="flex gap-2">
-                <button class="activity-btn text-slate-400 hover:text-blue-500" data-id="${lead.id}"><i class="far fa-comment-dots"></i></button>
-                <button class="edit-lead-btn text-slate-400 hover:text-amber-500" data-id="${lead.id}"><i class="fas fa-pen-alt"></i></button>
-                <button class="delete-lead-btn text-slate-400 hover:text-red-500" data-id="${lead.id}"><i class="fas fa-trash-alt"></i></button>
-              </div>
+        <div class="bg-white dark:bg-[#262c34] rounded-2xl p-4 card-elegant border border-stone-100/80">
+          <div class="flex justify-between items-start">
+            <div class="flex gap-2 flex-wrap"><span class="text-xs px-3 py-1 rounded-full ${typeClass}">${l.type}</span><span class="text-xs px-3 py-1 rounded-full ${statusMap[l.status] || 'bg-gray-50'}">${l.status}</span></div>
+            <div class="flex gap-1">
+              <button class="detail-btn text-stone-400 hover:text-stone-600 p-1" data-id="${l.id}" title="View details"><i class="far fa-eye"></i></button>
+              <button class="called-btn text-stone-400 hover:text-emerald-600 p-1" data-id="${l.id}" title="Log call"><i class="fas fa-phone-alt"></i></button>
+              <button class="edit-btn text-stone-400 hover:text-amber-600 p-1" data-id="${l.id}"><i class="fas fa-pen"></i></button>
+              <button class="delete-btn text-stone-400 hover:text-rose-500 p-1" data-id="${l.id}"><i class="far fa-trash-alt"></i></button>
             </div>
-            <div class="mt-2"><h3 class="font-bold text-slate-800 dark:text-white text-base">${escapeHtml(lead.title)}</h3><p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">${escapeHtml(lead.company)}</p></div>
-            <div class="flex justify-between items-end mt-3"><div class="flex flex-col gap-1">${nextDateHtml}${lead.email ? `<div class="text-[11px] text-slate-400 truncate max-w-[150px]"><i class="far fa-envelope"></i> ${escapeHtml(lead.email)}</div>` : ''}</div>${valueHtml}</div>
-            ${lead.notes ? `<div class="mt-2 text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900 p-2 rounded-lg">📝 ${escapeHtml(lead.notes.substring(0, 80))}${lead.notes.length>80?'...':''}</div>` : ''}
-            <div class="mt-2 flex justify-end"><button class="text-xs text-blue-500 font-medium activity-btn" data-id="${lead.id}"><i class="far fa-clock"></i> Activity log</button></div>
           </div>
-        `;
-      }).join('');
-      document.querySelectorAll('.activity-btn').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); const id = parseInt(btn.dataset.id); openActivityModal(id); }));
-      document.querySelectorAll('.edit-lead-btn').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); const id = parseInt(btn.dataset.id); openEditModal(id); }));
-      document.querySelectorAll('.delete-lead-btn').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); const id = parseInt(btn.dataset.id); deleteLead(id); }));
+          <div class="mt-2"><h3 class="font-medium text-lg text-stone-800 dark:text-white">${escapeHtml(l.title)}</h3><p class="text-sm text-stone-500">${escapeHtml(l.company)}</p></div>
+          <div class="flex justify-between items-end mt-3"><div>${l.nextActionDate?`<div class="text-xs text-stone-400"><i class="far fa-calendar mr-1"></i>${l.nextActionDate}</div>`:''}</div><div class="font-medium">$${(Number(l.value)||0).toLocaleString()}</div></div>
+        </div>`}).join('');
+        
+      document.querySelectorAll('.detail-btn').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); showDetailModal(Number(b.dataset.id)); }));
+      document.querySelectorAll('.called-btn').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); addCalledActivity(Number(b.dataset.id)); }));
+      document.querySelectorAll('.edit-btn').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); openEdit(Number(b.dataset.id)); }));
+      document.querySelectorAll('.delete-btn').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); if(confirm('Delete?')){ leads = leads.filter(l=> l.id != Number(b.dataset.id)); saveLeads(); renderAll(); }}));
     }
-
-    function openActivityModal(leadId) { currentActivityLeadId = leadId; renderActivityModal(leadId); document.getElementById('activityModal').classList.remove('hidden'); document.getElementById('activityModal').classList.add('flex'); }
-    function closeActivityModal() { document.getElementById('activityModal').classList.add('hidden'); document.getElementById('activityModal').classList.remove('flex'); currentActivityLeadId = null; }
-
-    function openEditModal(id) {
-      const lead = leads.find(l => l.id == id);
-      if (!lead) return;
-      document.getElementById('modalTitle').innerText = '✏️ Edit opportunity';
-      document.getElementById('leadId').value = lead.id;
-      document.getElementById('leadType').value = lead.type;
-      document.getElementById('leadTitle').value = lead.title;
-      document.getElementById('leadCompany').value = lead.company;
-      document.getElementById('leadValue').value = lead.value;
-      document.getElementById('leadNextDate').value = lead.nextActionDate || '';
-      document.getElementById('leadEmail').value = lead.email || '';
-      document.getElementById('leadPhone').value = lead.phone || '';
-      document.getElementById('leadStatus').value = lead.status;
-      document.getElementById('leadNotes').value = lead.notes || '';
+    
+    function showDetailModal(id) {
+      const lead = leads.find(l => l.id === id); if(!lead) return;
+      const cont = document.getElementById('detailContent');
+      const activityList = lead.activities?.length ? lead.activities.slice().reverse().map(a => `<div class="text-sm border-l-2 border-stone-300 pl-3 py-1"><span class="block">${escapeHtml(a.text)}</span><span class="text-[10px] text-stone-400">${new Date(a.date).toLocaleString()}</span></div>`).join('') : '<p class="text-stone-400 italic text-sm">No activity logged</p>';
+      cont.innerHTML = `
+        <div class="space-y-3">
+          <div class="grid grid-cols-2 gap-3 text-sm"><div><span class="text-stone-400 text-xs block">Type</span><span class="font-medium">${lead.type}</span></div><div><span class="text-stone-400 text-xs block">Status</span><span>${lead.status}</span></div></div>
+          <div><span class="text-stone-400 text-xs block">Title</span><p class="font-medium text-lg">${escapeHtml(lead.title)}</p></div>
+          <div><span class="text-stone-400 text-xs block">Organization</span><p>${escapeHtml(lead.company)}</p></div>
+          <div class="grid grid-cols-2 gap-3"><div><span class="text-stone-400 text-xs block">Value</span><span>$${(Number(lead.value)||0).toLocaleString()}</span></div><div><span class="text-stone-400 text-xs block">Next action</span><span>${lead.nextActionDate || '—'}</span></div></div>
+          <div><span class="text-stone-400 text-xs block">Contact</span><p>${escapeHtml(lead.email) || '—'}  ${escapeHtml(lead.phone) || ''}</p></div>
+          <div><span class="text-stone-400 text-xs block">Notes</span><p class="text-sm whitespace-pre-wrap">${escapeHtml(lead.notes) || '—'}</p></div>
+          <div class="pt-2"><span class="text-stone-400 text-xs block mb-2">Activity</span>${activityList}</div>
+          <div class="flex gap-2 pt-2"><button id="detailCalledBtn" class="flex-1 btn-primary py-2 rounded-lg text-sm"><i class="fas fa-phone-alt mr-1"></i>Log call</button><button id="detailAddNoteBtn" class="flex-1 bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-200 py-2 rounded-lg text-sm"><i class="far fa-plus mr-1"></i>Add note</button></div>
+        </div>
+      `;
+      document.getElementById('detailCalledBtn').onclick = () => { addCalledActivity(id); showDetailModal(id); };
+      document.getElementById('detailAddNoteBtn').onclick = () => { const note = prompt('Enter activity note:'); if(note) { addActivity(id, note); showDetailModal(id); } };
+      document.getElementById('detailModal').classList.remove('hidden'); document.getElementById('detailModal').classList.add('flex');
+    }
+    
+    function openEdit(id) {
+      const l = leads.find(l=> l.id===id); if(!l) return;
+      document.getElementById('modalTitle').innerText = 'Edit opportunity';
+      document.getElementById('leadId').value = l.id;
+      document.getElementById('leadType').value = l.type;
+      document.getElementById('leadTitle').value = l.title;
+      document.getElementById('leadCompany').value = l.company;
+      document.getElementById('leadValue').value = l.value;
+      document.getElementById('leadNextDate').value = l.nextActionDate || '';
+      document.getElementById('leadEmail').value = l.email || '';
+      document.getElementById('leadPhone').value = l.phone || '';
+      document.getElementById('leadStatus').value = l.status;
+      document.getElementById('leadNotes').value = l.notes || '';
       document.getElementById('leadModal').classList.remove('hidden'); document.getElementById('leadModal').classList.add('flex');
     }
-
-    function resetModal() { document.getElementById('leadId').value = ''; document.getElementById('leadForm').reset(); document.getElementById('leadType').value = customTypes[0]; document.getElementById('leadStatus').value = 'Interested'; document.getElementById('leadValue').value = 0; document.getElementById('modalTitle').innerText = '➕ Add new lead'; }
-    function openAddModal() { resetModal(); document.getElementById('leadModal').classList.remove('hidden'); document.getElementById('leadModal').classList.add('flex'); }
-
-    function renderAll() { renderLeadsList(); updateStats(); }
-
-    // Dark mode
-    function initDarkMode() { if (localStorage.getItem('darkMode') === 'true') { document.documentElement.classList.add('dark'); document.getElementById('darkModeToggle').innerHTML = '<i class="fas fa-sun"></i>'; } else { document.documentElement.classList.remove('dark'); document.getElementById('darkModeToggle').innerHTML = '<i class="fas fa-moon"></i>'; } }
-    function toggleDarkMode() { const isDark = document.documentElement.classList.toggle('dark'); localStorage.setItem('darkMode', isDark); document.getElementById('darkModeToggle').innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>'; }
-
-    // Event binding
-    function bindEvents() {
-      document.getElementById('fabAddLead').addEventListener('click', openAddModal);
-      document.getElementById('closeModalBtn').addEventListener('click', () => { document.getElementById('leadModal').classList.add('hidden'); });
-      document.getElementById('closeActivityBtn').addEventListener('click', closeActivityModal);
-      document.getElementById('addActivityBtn').addEventListener('click', () => { if(currentActivityLeadId) { const txt = document.getElementById('newActivityText').value; if(txt.trim()) { addActivityToLead(currentActivityLeadId, txt); document.getElementById('newActivityText').value = ''; } } });
-      document.getElementById('leadForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const id = document.getElementById('leadId').value;
-        const leadData = { type: document.getElementById('leadType').value, title: document.getElementById('leadTitle').value, company: document.getElementById('leadCompany').value, value: parseInt(document.getElementById('leadValue').value) || 0, nextActionDate: document.getElementById('leadNextDate').value, email: document.getElementById('leadEmail').value, phone: document.getElementById('leadPhone').value, status: document.getElementById('leadStatus').value, notes: document.getElementById('leadNotes').value };
-        if (id) updateLead(parseInt(id), leadData); else addLead(leadData);
-        document.getElementById('leadModal').classList.add('hidden');
-      });
-      document.getElementById('searchInput').addEventListener('input', (e) => { searchQuery = e.target.value; renderAll(); });
-      document.getElementById('addTypeBtn').addEventListener('click', () => { const newType = document.getElementById('newTypeName').value; if(newType.trim() && addCustomType(newType)) { document.getElementById('newTypeName').value = ''; renderTypeFilters(); renderTypeSelect(); renderAll(); } else alert('Invalid or duplicate type name'); });
-      document.querySelectorAll('.status-filter').forEach(btn => btn.addEventListener('click', () => { document.querySelectorAll('.status-filter').forEach(b => b.classList.remove('bg-blue-600', 'text-white')); btn.classList.add('bg-blue-600', 'text-white'); currentStatusFilter = btn.dataset.status; renderAll(); }));
-      document.getElementById('darkModeToggle').addEventListener('click', toggleDarkMode);
-      // close modals on backdrop click
-      document.getElementById('leadModal').addEventListener('click', (e) => { if(e.target === document.getElementById('leadModal')) document.getElementById('leadModal').classList.add('hidden'); });
-      document.getElementById('activityModal').addEventListener('click', (e) => { if(e.target === document.getElementById('activityModal')) closeActivityModal(); });
+    function openAdd() {
+      document.getElementById('leadForm').reset(); document.getElementById('leadId').value = '';
+      document.getElementById('leadType').value = customTypes[0]; document.getElementById('leadStatus').value = 'Interested';
+      document.getElementById('leadValue').value = 0; document.getElementById('modalTitle').innerText = 'New opportunity';
+      document.getElementById('leadModal').classList.remove('hidden'); document.getElementById('leadModal').classList.add('flex');
     }
-
-    document.getElementById('currentDate').innerText = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    function renderAll() { renderLeads(); updateStats(); }
+    
+    // Export/Import
+    function exportData() {
+      const data = { leads, customTypes };
+      const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `prospect_backup_${new Date().toISOString().slice(0,10)}.json`; a.click();
+    }
+    function importData(file) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (imported.leads && imported.customTypes) {
+            if (confirm('Replace current data with imported backup?')) {
+              leads = imported.leads; customTypes = imported.customTypes;
+              saveLeads(); saveTypes(); renderTypeFilters(); renderTypeSelect(); renderAll();
+            }
+          } else alert('Invalid backup file.');
+        } catch { alert('Invalid JSON.'); }
+      };
+      reader.readAsText(file);
+    }
+    
+    // Dark mode
+    function initDark() {
+      if(localStorage.getItem('darkMode')==='true') { document.documentElement.classList.add('dark'); document.getElementById('darkModeToggle').innerHTML='<i class="fas fa-sun"></i>'; }
+      else document.getElementById('darkModeToggle').innerHTML='<i class="fas fa-moon"></i>';
+    }
+    function toggleDark() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('darkMode', isDark);
+      document.getElementById('darkModeToggle').innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+    }
+    
+    function bindEvents() {
+      document.getElementById('fabAddLead').addEventListener('click', openAdd);
+      document.getElementById('closeModalBtn').addEventListener('click', ()=> document.getElementById('leadModal').classList.add('hidden'));
+      document.getElementById('closeDetailModalBtn').addEventListener('click', ()=> document.getElementById('detailModal').classList.add('hidden'));
+      document.getElementById('closeActivityBtn').addEventListener('click', ()=> document.getElementById('activityModal').classList.add('hidden'));
+      document.getElementById('addActivityBtn').addEventListener('click', ()=>{ if(currentActivityLeadId) { addActivity(currentActivityLeadId, document.getElementById('newActivityText').value); document.getElementById('newActivityText').value = ''; }});
+      document.getElementById('leadForm').addEventListener('submit', e => {
+        e.preventDefault(); const id = document.getElementById('leadId').value;
+        const data = { type: document.getElementById('leadType').value, title: document.getElementById('leadTitle').value, company: document.getElementById('leadCompany').value, value: Number(document.getElementById('leadValue').value)||0, nextActionDate: document.getElementById('leadNextDate').value, email: document.getElementById('leadEmail').value, phone: document.getElementById('leadPhone').value, status: document.getElementById('leadStatus').value, notes: document.getElementById('leadNotes').value };
+        if(id) { const idx = leads.findIndex(l=>l.id==id); if(idx!==-1) leads[idx] = {...leads[idx], ...data, activities: leads[idx].activities||[]}; }
+        else leads.unshift({...data, id: Date.now(), createdAt: new Date().toISOString(), activities:[]});
+        saveLeads(); renderAll(); document.getElementById('leadModal').classList.add('hidden');
+      });
+      document.getElementById('searchInput').addEventListener('input', e => { searchQuery = e.target.value; renderAll(); });
+      document.getElementById('addTypeBtn').addEventListener('click', ()=>{
+        const inp = document.getElementById('newTypeName');
+        if(addCustomType(inp.value)) { inp.value = ''; } else alert('Invalid or duplicate');
+      });
+      document.querySelectorAll('.status-filter').forEach(b => b.addEventListener('click', ()=>{
+        document.querySelectorAll('.status-filter').forEach(bt => bt.classList.remove('filter-active')); b.classList.add('filter-active');
+        currentStatusFilter = b.dataset.status; renderAll();
+      }));
+      document.getElementById('manageTypesBtn').addEventListener('click', ()=>{ renderManageTypesModal(); document.getElementById('manageTypesModal').classList.remove('hidden'); document.getElementById('manageTypesModal').classList.add('flex'); });
+      document.getElementById('closeManageTypesBtn').addEventListener('click', ()=> document.getElementById('manageTypesModal').classList.add('hidden'));
+      document.getElementById('doneManageTypes').addEventListener('click', ()=> document.getElementById('manageTypesModal').classList.add('hidden'));
+      document.getElementById('exportBtn').addEventListener('click', exportData);
+      document.getElementById('importFile').addEventListener('change', e => { if(e.target.files[0]) importData(e.target.files[0]); e.target.value = ''; });
+      document.getElementById('darkModeToggle').addEventListener('click', toggleDark);
+      document.querySelectorAll('.modal-backdrop').forEach(m => m.addEventListener('click', e => { if(e.target === m) m.classList.add('hidden'); }));
+    }
+    
+    document.getElementById('currentDate').innerText = new Date().toLocaleDateString('en-US',{ month:'short', day:'numeric', year:'numeric' });
     loadData();
     bindEvents();
-    renderTypeFilters();
-    renderTypeSelect();
-    initDarkMode();
-  </script>
+    renderTypeFilters(); renderTypeSelect(); initDark();
+    document.querySelector('.status-filter[data-status="all"]').classList.add('filter-active');
+  })();
+</script>
 </body>
 </html>
